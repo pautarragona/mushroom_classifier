@@ -96,7 +96,7 @@ python mushroom_classifier_robust_explicado.py
 
 **Configuración:**
 - Batch size: 48
-- Epochs: 150 (75 fase 1 + 75 fase 2)
+- Epochs: 200 (100 fase 1 + 100 fase 2)
 - Image size: 224x224
 - GPU memory: ~3GB
 
