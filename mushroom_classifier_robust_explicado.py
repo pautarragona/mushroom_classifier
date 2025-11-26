@@ -79,8 +79,8 @@ else:
 DATA_DIR = 'Mushrooms' 
 IMG_SIZE = (224, 224)
 BATCH_SIZE = 48 # número de imágenes que se procesan juntas (aumentado para usar ~3GB GPU)
-EPOCHS_PHASE1 = 100  
-EPOCHS_PHASE2 = 100 # en total son phase 1 + phase 2 = 200 epochs
+EPOCHS_PHASE1 = 60  
+EPOCHS_PHASE2 = 60 # en total son phase 1 + phase 2 = 120 epochs
 VAL_SPLIT = 0.15  
 TEST_SPLIT = 0.15
 TRAIN_SPLIT = 0.70
@@ -107,10 +107,10 @@ def mixup(images, labels, alpha=0.2):
 # Augmentación agresiva aplicando transformaciones aleatorias para combatir el overfitting
 def aggressive_augment(image):
     # Cambia el brillo, contraste, saturación, tono de color, rota 90º, flip horizontal, flip vertical
-    image = tf.image.random_brightness(image, max_delta=0.3)
-    image = tf.image.random_contrast(image, lower=0.5, upper=1.5)
-    image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
-    image = tf.image.random_hue(image, max_delta=0.15)
+    image = tf.image.random_brightness(image, max_delta=0.2)
+    image = tf.image.random_contrast(image, lower=0.7, upper=1.3)
+    image = tf.image.random_saturation(image, lower=0.7, upper=1.3)
+    image = tf.image.random_hue(image, max_delta=0.1)
     image = tf.image.rot90(image, k=tf.random.uniform([], 0, 4, dtype=tf.int32))
     image = tf.image.random_flip_left_right(image)
     image = tf.image.random_flip_up_down(image)
@@ -124,8 +124,8 @@ def aggressive_augment(image):
         image = tf.image.resize(image, IMG_SIZE)
     # Cutout: crea un rectángulo negro aleatorio en la imagen
     if tf.random.uniform([]) > 0.5:
-        cutout_h = tf.random.uniform([], 20, 60, dtype=tf.int32)
-        cutout_w = tf.random.uniform([], 20, 60, dtype=tf.int32)
+        cutout_h = tf.random.uniform([], 15, 40, dtype=tf.int32)
+        cutout_w = tf.random.uniform([], 15, 40, dtype=tf.int32)
         y_start = tf.random.uniform([], 0, IMG_SIZE[0] - cutout_h, dtype=tf.int32)
         x_start = tf.random.uniform([], 0, IMG_SIZE[1] - cutout_w, dtype=tf.int32)
         mask = tf.ones([cutout_h, cutout_w, 3])
@@ -211,10 +211,10 @@ def build_robust_model(num_classes):
     x = layers.GlobalAveragePooling2D()(x)
     x = layers.BatchNormalization()(x)
     x = layers.Dropout(0.3)(x) # desactiva el 30% de las neuronas
-    x = layers.Dense(256, activation='relu', kernel_regularizer=keras.regularizers.l2(0.005))(x) # penalización a pesos grandes
+    x = layers.Dense(512, activation='relu', kernel_regularizer=keras.regularizers.l2(0.003))(x) # más neuronas para mejor aprendizaje
     x = layers.BatchNormalization()(x)
     x = layers.Dropout(0.4)(x) # desactiva el 40% de las neuronas
-    x = layers.Dense(128, activation='relu', kernel_regularizer=keras.regularizers.l2(0.005))(x)
+    x = layers.Dense(256, activation='relu', kernel_regularizer=keras.regularizers.l2(0.003))(x)
     x = layers.BatchNormalization()(x)
     x = layers.Dropout(0.5)(x) # desactiva el 50% de las neuronas
     outputs = layers.Dense(num_classes, activation='softmax')(x)
@@ -241,7 +241,7 @@ def create_callbacks(timestamp):
 # Fase 1: entrena solo la cabeza del modelo. Da peso a clases minoritarias para balancear.
 def train_phase1(model, train_ds, val_ds, class_weights, timestamp):
     model.compile(
-        optimizer=keras.optimizers.Adam(learning_rate=0.001),
+        optimizer=keras.optimizers.Adam(learning_rate=0.002),
         loss=keras.losses.CategoricalCrossentropy(label_smoothing=0.05),
         metrics=['accuracy', keras.metrics.TopKCategoricalAccuracy(k=3, name='top3_acc')]
     )
@@ -254,10 +254,10 @@ def train_phase1(model, train_ds, val_ds, class_weights, timestamp):
 # Fase 2: fine-tuning, descongela las últimas capas y entrena con LR bajo
 def train_phase2(model, base_model, train_ds, val_ds, class_weights, timestamp):
     base_model.trainable = True
-    for layer in base_model.layers[:-80]:
+    for layer in base_model.layers[:-100]:
         layer.trainable = False
     model.compile(
-        optimizer=keras.optimizers.Adam(learning_rate=5e-5),
+        optimizer=keras.optimizers.Adam(learning_rate=1e-4),
         loss=keras.losses.CategoricalCrossentropy(label_smoothing=0.05),
         metrics=['accuracy', keras.metrics.TopKCategoricalAccuracy(k=3, name='top3_acc')]
     )
