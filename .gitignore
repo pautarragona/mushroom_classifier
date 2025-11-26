@@ -1,0 +1,46 @@
+# Entornos virtuales y Python
+venv/
+env/
+iao/
+iao_tf/
+*.conda/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Carpetas de datos (imágenes)
+Mushrooms/
+Mushrooms_YOLO/
+mushrooms/
+data/
+dataset/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+*.lnk
+
+# Checkpoints pesados (modelos guardados)
+imagenet/checkpoints/*.h5
+yolo/checkpoints/*.pt
+runs/
+
+# Archivos temporales
+*.log
+*.tmp
+*.swp
+.vscode/
+.idea/
+*.pyc
+
+# Modelos muy pesados
+*.weights
+*.pb
+*.onnx
+best_*.h5
+
+# Archivos de instalación
+FIX_GPU_TENSORFLOW.txt
+test_gpu.py
