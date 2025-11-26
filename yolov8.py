@@ -62,9 +62,6 @@ os.makedirs(RESULTS_DIR, exist_ok=True) # guardar datos
 # Preparación del dataset en formato YOLO
 
 def prepare_yolo_dataset(source_dir, target_dir, train_split=0.70, val_split=0.15):
-    """
-    Prepara el dataset en la estructura esperada por YOLOv8 para clasificación.
-    """
     target_path = Path(target_dir)
     if target_path.exists():
         shutil.rmtree(target_path)
@@ -94,9 +91,6 @@ def prepare_yolo_dataset(source_dir, target_dir, train_split=0.70, val_split=0.1
 # Entrenamiento del modelo YOLOv8
 
 def train_yolo_classifier(data_dir, model_name, classes):
-    """
-    Entrena un clasificador YOLOv8 con configuración robusta y anti-overfitting.
-    """
     model = YOLO(model_name)
     model.train(
         data=data_dir,
@@ -144,9 +138,6 @@ def train_yolo_classifier(data_dir, model_name, classes):
 # Evaluación y visualización de resultados
 
 def evaluate_yolo_model(model, test_dir, classes, timestamp, unknown_threshold=0.5):
-    """
-    Evalúa el modelo YOLO en el conjunto de test, añade la clase 'otras' si la confianza máxima es baja, y guarda el reporte de clasificación en JSON.
-    """
     test_path = Path(test_dir) / 'test'
     all_predictions = []
     all_true_labels = []
@@ -185,12 +176,9 @@ def evaluate_yolo_model(model, test_dir, classes, timestamp, unknown_threshold=0
         json.dump(report_dict, f, indent=2)
     return all_predictions, all_true_labels, all_confidences, report_dict
 
-# --- Visualización de resultados ---
+# Visualización de resultados
+
 def plot_yolo_results(model, predictions, true_labels, confidences, classes, timestamp):
-    """
-    Genera y guarda todos los gráficos relevantes en la carpeta 'yolo'.
-    Formato idéntico al código robust para comparación directa.
-    """
     print("\nGenerando visualizaciones...")
     
     results_path = Path('runs/classify/mushroom_yolo8_gpu')
@@ -328,9 +316,6 @@ def plot_yolo_results(model, predictions, true_labels, confidences, classes, tim
 # Pipeline principal
 
 def main():
-    """
-    Pipeline principal: prepara datos, entrena, evalúa y guarda resultados y gráficos.
-    """
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     if not os.path.exists(DATA_DIR):
         print(f"\nERROR: '{DATA_DIR}' no encontrado")
