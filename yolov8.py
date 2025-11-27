@@ -327,6 +327,16 @@ def main():
     plot_yolo_results(model, predictions, true_labels, confidences, classes, timestamp)
     with open(os.path.join(RESULTS_DIR, f'classes_yolo9_{timestamp}.json'), 'w') as f:
         json.dump(classes, f, indent=2)
+    # Copiar pesos entrenados a carpeta estándar para test_yolo.py
+    export_dir = Path('yolo/weights')
+    export_dir.mkdir(parents=True, exist_ok=True)
+    best_src = Path('runs/classify/mushroom_yolo8_gpu/weights/best.pt')
+    if best_src.exists():
+        dest_path = export_dir / 'best.pt'
+        shutil.copy2(best_src, dest_path)
+        print(f"\n✅ Pesos exportados a: {dest_path}")
+    else:
+        print("\n⚠️ No se encontró 'best.pt' en la ruta esperada. Verifica el nombre del experimento o si el entrenamiento terminó correctamente.")
     print(f"\nTodos los resultados y gráficos se han guardado en la carpeta '{RESULTS_DIR}'.")
 
 if __name__ == "__main__":
