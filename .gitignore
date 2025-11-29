@@ -15,6 +15,7 @@ Mushrooms_YOLO/
 mushrooms/
 data/
 dataset/
+mushrooms_augmented/
 
 # Archivos de sistema
 .DS_Store
